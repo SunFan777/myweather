@@ -1,6 +1,7 @@
 package com.myweather.app.activity;
 
 import com.myweather.app.R;
+import com.myweather.app.service.AutoUpdateService;
 import com.myweather.app.util.HttpCallbackListener;
 import com.myweather.app.util.HttpUtil;
 import com.myweather.app.util.Utility;
@@ -90,7 +91,7 @@ public class WeatherActivity extends Activity implements OnClickListener {
 
 	// 查询天气代号对应的天气信息
 	private void queryWeatherInfo(String weatherCode) {
-		String address = "http://www.weather.com.cn/data/cityinfo/" + weatherCode + ".html";
+		String address = "http://www.weather.com.cn/data/cityinfo/" + weatherCode + ".html";//接口已失效
 		queryFromServer(address, "weatherCode");
 	}
 
@@ -128,10 +129,10 @@ public class WeatherActivity extends Activity implements OnClickListener {
 		});
 	}
 
-	// 从SharedPreferences文件中读取存储好的天气信息，并显示到界面上
+	// 从SharedPreferences文件中读取存储好的天气信息，并显示到界面上(要回主线程）
 	private void showWeather() {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		cityNameText.setText(prefs.getString("city_name", ""));
+		cityNameText.setText(prefs.getString("city_name", "无效"));
 		temp1Text.setText(prefs.getString("temp1", ""));
 		temp2Text.setText(prefs.getString("temp2", ""));
 		weatherDespText.setText(prefs.getString("weather_desp", ""));
@@ -139,5 +140,9 @@ public class WeatherActivity extends Activity implements OnClickListener {
 		currentDateText.setText(prefs.getString("current_date", ""));
 		weatherInfoLayout.setVisibility(View.VISIBLE);
 		cityNameText.setVisibility(View.VISIBLE);
+		
+		Intent intent=new Intent(this,AutoUpdateService.class);
+		startService(intent);
+		
 	}
 }

@@ -141,9 +141,9 @@ public class ChooseAreaActivity extends Activity {
 		String address;
 		// 在此输入查询api的网址
 		if (!TextUtils.isEmpty(code)) {
-			address = "http://www.weather.com.cn/data/list3/city" + code + ".xml";// 此接口已无效
+			address = "http://www.weather.com.cn/data/list3/city" + code + ".xml";
 		} else {
-			address = "http://www.weather.com.cn/data/list3/city.xml";// 此接口已无效
+			address = "http://www.weather.com.cn/data/list3/city.xml";
 		}
 		showProgressDialog();
 		HttpUtil.sendHttpRequest(address, new HttpCallbackListener() {
