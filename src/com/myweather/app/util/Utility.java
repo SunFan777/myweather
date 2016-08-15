@@ -1,10 +1,20 @@
 package com.myweather.app.util;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.myweather.app.model.City;
 import com.myweather.app.model.County;
 import com.myweather.app.model.MyWeatherDB;
 import com.myweather.app.model.Province;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 public class Utility {
@@ -62,5 +72,37 @@ public class Utility {
 			}
 		}
 		return false;
+	}
+	
+	//解析服务器返回的JSON天气信息
+	public static void handleWeatherResponse(Context context,String response){
+		try{
+			JSONObject jsonObject=new JSONObject(response);
+			JSONObject weatherInfo=jsonObject.getJSONObject("weatherinfo");
+			String cityName=weatherInfo.getString("city");
+			String weatherCode=weatherInfo.getString("cityid");
+			String temp1=weatherInfo.getString("temp1");
+			String temp2=weatherInfo.getString("temp2");
+			String weatherDesp=weatherInfo.getString("weather");
+			String publishTime=weatherInfo.getString("ptime");
+			saveWeatherInfo(context,cityName,weatherCode,temp1,temp2,weatherDesp,publishTime);
+		}catch(JSONException e){
+			e.printStackTrace();
+		}
+	}
+	
+	//存储天气信息到SharedPreferences中去
+	public static void saveWeatherInfo(Context context,String cityName,String weatherCode,String temp1,String temp2,String weatherDesp,String publishTime){
+		SimpleDateFormat sdf=new SimpleDateFormat("xxxx年y月z日",Locale.CHINA);
+		SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
+		editor.putBoolean("city_selected", true);//设置标志位
+		editor.putString("city_name", cityName);
+		editor.putString("weather_code", weatherCode);
+		editor.putString("temp1",temp1);
+		editor.putString("temp2",temp2);
+		editor.putString("weather_desp",weatherDesp);
+		editor.putString("publish_time",publishTime);
+		editor.putString("current_date",sdf.format(new Date()));
+		editor.commit();
 	}
 }
