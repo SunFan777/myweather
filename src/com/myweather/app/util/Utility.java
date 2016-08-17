@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -73,36 +74,81 @@ public class Utility {
 		}
 		return false;
 	}
-	
-	//解析服务器返回的JSON天气信息
-	public static void handleWeatherResponse(Context context,String response){
-		try{
-			JSONObject jsonObject=new JSONObject(response);
-			JSONObject weatherInfo=jsonObject.getJSONObject("weatherinfo");
-			String cityName=weatherInfo.getString("city");
-			String weatherCode=weatherInfo.getString("cityid");
-			String temp1=weatherInfo.getString("temp1");
-			String temp2=weatherInfo.getString("temp2");
-			String weatherDesp=weatherInfo.getString("weather");
-			String publishTime=weatherInfo.getString("ptime");
-			saveWeatherInfo(context,cityName,weatherCode,temp1,temp2,weatherDesp,publishTime);
-		}catch(JSONException e){
+
+	// 解析中国天气网服务器返回的JSON天气信息
+	public static void handleWeatherResponse(Context context, String response) {
+		try {
+			JSONObject jsonObject = new JSONObject(response);
+			JSONObject weatherInfo = jsonObject.getJSONObject("weatherinfo");
+			String cityName = weatherInfo.getString("city");
+			String weatherCode = weatherInfo.getString("cityid");
+			String temp1 = weatherInfo.getString("temp1");
+			String temp2 = weatherInfo.getString("temp2");
+			String weatherDesp = weatherInfo.getString("weather");
+			String publishTime = weatherInfo.getString("ptime");
+			saveWeatherInfo(context, cityName, weatherCode, temp1, temp2, weatherDesp, publishTime);
+		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	//存储天气信息到SharedPreferences中去
-	public static void saveWeatherInfo(Context context,String cityName,String weatherCode,String temp1,String temp2,String weatherDesp,String publishTime){
-		SimpleDateFormat sdf=new SimpleDateFormat("xxxx年y月z日",Locale.CHINA);
-		SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(context).edit();
-		editor.putBoolean("city_selected", true);//设置标志位
+
+	// 存储中国天气网服务器返回的天气信息到SharedPreferences中去
+	public static void saveWeatherInfo(Context context, String cityName, String weatherCode, String temp1, String temp2,
+			String weatherDesp, String publishTime) {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
+		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+		editor.putBoolean("city_selected", true);// 设置标志位,表示已经选中一个城市
 		editor.putString("city_name", cityName);
 		editor.putString("weather_code", weatherCode);
-		editor.putString("temp1",temp1);
-		editor.putString("temp2",temp2);
-		editor.putString("weather_desp",weatherDesp);
-		editor.putString("publish_time",publishTime);
-		editor.putString("current_date",sdf.format(new Date()));
+		editor.putString("temp1", temp1);
+		editor.putString("temp2", temp2);
+		editor.putString("weather_desp", weatherDesp);
+		editor.putString("publish_time", publishTime);
+		editor.putString("current_date", sdf.format(new Date()));
+		editor.commit();
+	}
+
+	// 解析心知天气服务器返回的JSON天气信息
+	public static void handleWeatherResponse2(Context context, String response) {
+		try {
+
+			
+			JSONObject jsonObject = new JSONObject(response);
+			JSONArray resultsArray = jsonObject.getJSONArray("results");
+
+			JSONObject resultsInfo = resultsArray.getJSONObject(0);
+			
+			JSONObject location=resultsInfo.getJSONObject("location");
+			String cityName = location.getString("name");
+			
+			JSONArray daily = resultsInfo.getJSONArray("daily");
+			JSONObject weatherInfo=daily.getJSONObject(0);			
+			String temp1 = weatherInfo.getString("low");
+			String temp2 = weatherInfo.getString("high");
+			String weatherDesp = weatherInfo.getString("text_day");
+						
+			String publishTime = resultsInfo.getString("last_update");
+
+			saveWeatherInfo2(context, cityName, temp1, temp2, weatherDesp, publishTime);
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// 存储心知天气服务器返回的天气信息到SharedPreferences中去
+	public static void saveWeatherInfo2(Context context, String cityName, String temp1, String temp2,
+			String weatherDesp, String publishTime) {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
+		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+		editor.putString("city_name", cityName);
+		editor.putString("temp1", temp1);
+		editor.putString("temp2", temp2);
+		editor.putString("weather_desp", weatherDesp);
+		editor.putString("publish_time", publishTime);
+		editor.putString("current_date", sdf.format(new Date()));
 		editor.commit();
 	}
 }

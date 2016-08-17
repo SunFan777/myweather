@@ -54,6 +54,8 @@ public class ChooseAreaActivity extends Activity {
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		//如果已经选择了城市且不是刚从天气活动界面切换回这个选择活动界面，就直接进入天气界面
 		isFromWeatherActivity = getIntent().getBooleanExtra("from_weather_activity", false);
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		if (prefs.getBoolean("city_selected", false) && !isFromWeatherActivity) {
@@ -62,8 +64,10 @@ public class ChooseAreaActivity extends Activity {
 			finish();
 			return;
 		}
+
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.choose_area);
+
 		listView = (ListView) findViewById(R.id.list_view);
 		titleText = (TextView) findViewById(R.id.title_text);
 		adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dataList);
@@ -96,7 +100,7 @@ public class ChooseAreaActivity extends Activity {
 			for (Province province : provinceList) {
 				dataList.add(province.getProvinceName());
 			}
-			adapter.notifyDataSetChanged();
+			adapter.notifyDataSetChanged();// 此处适配器刷新ListVIew的UI
 			listView.setSelection(0);
 			titleText.setText("中国");
 			currentLevel = LEVEL_PROVINCE;
@@ -157,6 +161,7 @@ public class ChooseAreaActivity extends Activity {
 					result = Utility.handleCountiesResponse(myWeatherDB, response, selectedCity.getId());
 				}
 				if (result) {
+					// 回UI线程：
 					runOnUiThread(new Runnable() {
 						public void run() {
 							closeProgressDialog();
@@ -205,13 +210,12 @@ public class ChooseAreaActivity extends Activity {
 			queryCities();
 		} else if (currentLevel == LEVEL_CITY) {
 			queryProvinces();
-		} else {
-			if (isFromWeatherActivity) {
-				Intent intent = new Intent(this, WeatherActivity.class);
+		} else {			
+				Intent intent = new Intent(this, FirstActivity.class);
 				startActivity(intent);
+				finish();
 			}
-			finish();
 		}
+
 	}
 
-}
